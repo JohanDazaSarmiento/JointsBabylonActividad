@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
+        <script src="https://preview.babylonjs.com/ammo.js"></script>
+        <script src="https://preview.babylonjs.com/cannon.js"></script>
+        <script src="https://preview.babylonjs.com/Oimo.js"></script>
+        <script src="https://preview.babylonjs.com/earcut.min.js"></script>
+        <script src="https://preview.babylonjs.com/babylon.js"></script>
+        <script src="https://preview.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://preview.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://preview.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://preview.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://preview.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+            
+            #canvasZone {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+<body>
+    <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var startRenderLoop = function (engine, canvas) {
+            engine.runRenderLoop(function () {
+                if (sceneToRender && sceneToRender.activeCamera) {
+                    sceneToRender.render();
+                }
+            });
+        }
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
+        var createScene = function () {
+        
+            // This creates a basic Babylon Scene object (non-mesh)
+            var scene = new BABYLON.Scene(engine);
+        
+            var camera = new BABYLON.ArcRotateCamera("Camera", 3 * Math.PI / 2, Math.PI / 3, 3, BABYLON.Vector3.Zero(), scene);
+        
+        	camera.attachControl(canvas, true);
+        
+        
+            // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+            var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+        
+            // Default intensity is 1. Let's dim the light a small amount
+            light.intensity = 0.7;
+        
+        
+            scene.enablePhysics(new BABYLON.Vector3(0, -1, 0), new BABYLON.CannonJSPlugin());
+        
+        
+            var tubes = []; //array to hold all the tubes
+            var tubeLength = 0.5;   //how long the full tube should be
+            var tubePath = [
+                new BABYLON.Vector3(0,0,0),
+                new BABYLON.Vector3(0,.1,0),
+            ]
+        
+            var impostorOptions = {
+                mass: 0.11,
+                friction: 1,
+                restitution: 1,
+                nativeOptions: {},
+                ignoreParent: false,
+                disableBidirectionalTransformation: true};
+        
+            var hingeOptions = {
+                collision: true,
+                connectedAxis: new BABYLON.Vector3(1,1,1),
+                connectedPivot: new BABYLON.Vector3(0,0,0),
+                mainAxis: new BABYLON.Vector3(1,1,1),
+                mainPivot: new BABYLON.Vector3(0,.1,0),
+                nativeParams: {}
+                };
+        
+        
+            var tube0 = new BABYLON.MeshBuilder.CreateTube("tube", {path: tubePath, radius: 0.011, tesselation: 0, radiusFunction: 0, cap: 0, arc: 1, updatable: true, sideOrientation: BABYLON.Mesh.DOUBLESIDE});
+            var tube1 = new BABYLON.MeshBuilder.CreateTube("tube", {path: tubePath, radius: 0.011, tesselation: 0, radiusFunction: 0, cap: 0, arc: 1, updatable: true, sideOrientation: BABYLON.Mesh.DOUBLESIDE});
+            var tube2 = new BABYLON.MeshBuilder.CreateTube("tube", {path: tubePath, radius: 0.011, tesselation: 0, radiusFunction: 0, cap: 0, arc: 1, updatable: true, sideOrientation: BABYLON.Mesh.DOUBLESIDE});
+            var tube3 = new BABYLON.MeshBuilder.CreateTube("tube", {path: tubePath, radius: 0.011, tesselation: 0, radiusFunction: 0, cap: 0, arc: 1, updatable: true, sideOrientation: BABYLON.Mesh.DOUBLESIDE});
+            var tube4 = new BABYLON.MeshBuilder.CreateTube("tube", {path: tubePath, radius: 0.011, tesselation: 0, radiusFunction: 0, cap: 0, arc: 1, updatable: true, sideOrientation: BABYLON.Mesh.DOUBLESIDE});
+        
+            tube1.setPivotPoint(new BABYLON.Vector3(0,0,0), BABYLON.Space.LOCAL);
+            tube2.setPivotPoint(new BABYLON.Vector3(0,0,0), BABYLON.Space.LOCAL);
+            tube3.setPivotPoint(new BABYLON.Vector3(0,0,0), BABYLON.Space.LOCAL);
+            tube4.setPivotPoint(new BABYLON.Vector3(0,0,0), BABYLON.Space.LOCAL);
+            
+            tube1.position.y = .15;
+            tube2.position.y = .25;
+            tube3.position.y = .35;
+            tube4.position.y = .45;
+        
+        
+        
+            tube0.physicsImpostor = new BABYLON.PhysicsImpostor(tube0, BABYLON.PhysicsImpostor.CylinderImpostor, {mass: 0});
+            tube1.physicsImpostor = new BABYLON.PhysicsImpostor(tube1, BABYLON.PhysicsImpostor.CylinderImpostor, impostorOptions);
+            tube2.physicsImpostor = new BABYLON.PhysicsImpostor(tube2, BABYLON.PhysicsImpostor.CylinderImpostor, impostorOptions);
+            tube3.physicsImpostor = new BABYLON.PhysicsImpostor(tube3, BABYLON.PhysicsImpostor.CylinderImpostor, impostorOptions);
+            tube4.physicsImpostor = new BABYLON.PhysicsImpostor(tube4, BABYLON.PhysicsImpostor.CylinderImpostor, impostorOptions);
+        
+        
+            tube0.physicsImpostor.createJoint(tube1.physicsImpostor, BABYLON.PhysicsJoint.HingeJoint, hingeOptions);
+            tube1.physicsImpostor.createJoint(tube2.physicsImpostor, BABYLON.PhysicsJoint.HingeJoint, hingeOptions);
+            tube2.physicsImpostor.createJoint(tube3.physicsImpostor, BABYLON.PhysicsJoint.HingeJoint, hingeOptions);
+            tube3.physicsImpostor.createJoint(tube4.physicsImpostor, BABYLON.PhysicsJoint.HingeJoint, hingeOptions);
+        
+            var sphere = new BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: .1});
+            sphere.setPivotPoint(new BABYLON.Vector3(0,0,0), BABYLON.LocalSpace);
+            sphere.position.y = .6;
+            sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, {mass: 0.1});
+            tube4.physicsImpostor.createJoint(sphere.physicsImpostor, BABYLON.PhysicsJoint.HingeJoint, hingeOptions);
+        
+            return scene;
+        
+        };
+                window.initFunction = async function() {
+                    
+                    
+                    var asyncEngineCreation = async function() {
+                        try {
+                        return createDefaultEngine();
+                        } catch(e) {
+                        console.log("the available createEngine function failed. Creating the default engine instead");
+                        return createDefaultEngine();
+                        }
+                    }
+
+                    window.engine = await asyncEngineCreation();
+        if (!engine) throw 'engine should not be null.';
+        startRenderLoop(engine, canvas);
+        window.scene = createScene();};
+        initFunction().then(() => {sceneToRender = scene                    
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
